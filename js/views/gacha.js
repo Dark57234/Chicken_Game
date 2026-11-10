@@ -8,7 +8,7 @@
     render(root) {
       root.innerHTML = `
         <section class="gacha">
-          <h2>Pull gamble</h2>
+          <h2>Pull</h2>
           <p class="hint">Each pull is 10 eggs.</p>
           <div class="gacha-stage">
             <span>🐓</span>
