@@ -1,0 +1,132 @@
+/* ===== Chicken Quest – shared styles (skeleton) ===== */
+:root {
+  --sky: #7792dc;
+  --grass: #66ae8b;
+  --grass-light: #7cbf9a;
+  --wood: #6b3a14;
+  --accent: #fb5555;
+  --gold: #fbbf3c;
+  --purple: #9a7de0;
+  --pale: #d6e0fb;
+  --ink: #1f2430;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: "Trebuchet MS", system-ui, sans-serif;
+  background: #f4f6fb; color: var(--ink);
+}
+button { font: inherit; cursor: pointer; }
+.hidden { display: none !important; }
+
+/* ----- top bar ----- */
+.topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 8px; padding: 10px 16px; background: #fff;
+  border-bottom: 3px solid var(--grass);
+}
+.topbar h1 { margin: 0; font-size: 1.3rem; }
+#nav button {
+  border: 2px solid var(--grass); background: #fff; border-radius: 10px;
+  padding: 6px 14px; margin: 0 2px;
+}
+#nav button.active { background: var(--grass); color: #fff; }
+.eggs { font-weight: bold; font-size: 1.1rem; }
+
+main { max-width: 980px; margin: 16px auto; padding: 0 12px; }
+.panel-title { margin: 0 0 8px; }
+
+/* ----- battle / quest screen ----- */
+.scene {
+  position: relative; height: 340px; border-radius: 12px; overflow: hidden;
+  background: linear-gradient(var(--sky) 0 62%, var(--grass) 62% 100%);
+}
+.quest-box {
+  position: absolute; top: 8px; left: 8px; background: #fff;
+  border: 3px solid #000; padding: 4px 12px; text-align: center; font-weight: bold;
+}
+.quest-box span { display: block; font-size: 1.6rem; }
+.home-btn {
+  position: absolute; top: 80px; left: 10px; font-size: 2rem;
+  background: none; border: none;
+}
+.sun { position: absolute; top: 18px; left: 46%; font-size: 2.4rem; }
+.cloud { position: absolute; font-size: 3rem; opacity: .9; }
+.cloud.c1 { top: 20px; left: 16%; } .cloud.c2 { top: 70px; left: 32%; }
+.cloud.c3 { top: 30px; left: 66%; }
+.fighter {
+  position: absolute; bottom: 50px; text-align: center; font-size: 3.6rem;
+}
+.fighter.player { left: 22%; } .fighter.snake { left: 55%; } .fighter.fox { right: 5%; }
+.fighter small { display: block; font-size: .8rem; }
+.hp-bar {
+  height: 10px; width: 80px; margin: 0 auto 4px; background: #fff;
+  border-radius: 5px; overflow: hidden;
+}
+.hp-bar i { display: block; height: 100%; background: var(--accent); }
+.battle-controls { margin-top: 12px; display: flex; gap: 8px; align-items: center; }
+.battle-controls button, .btn {
+  background: var(--accent); color: #fff; border: none; border-radius: 10px;
+  padding: 10px 18px; font-weight: bold;
+}
+.battle-log { margin-left: 8px; font-style: italic; }
+
+/* ----- gacha screen ----- */
+.gacha { background: var(--pale); border-radius: 12px; padding: 16px; min-height: 320px; }
+.gacha h2 { font-size: 2.2rem; margin: 0 0 4px; color: #5b5be6; }
+.gacha .hint { color: var(--purple); font-weight: bold; }
+.gacha-stage { display: flex; align-items: center; justify-content: center; gap: 24px; height: 150px; font-size: 4rem; }
+.gacha-stage .special { font-size: 1.1rem; color: var(--purple); font-weight: bold; }
+.pull-buttons { display: flex; gap: 16px; justify-content: center; }
+.pull-buttons button {
+  background: #fff; border: 3px solid var(--purple); color: var(--purple);
+  border-radius: 6px; padding: 12px 22px; font-weight: bold; font-size: 1.1rem;
+}
+.pull-results { margin-top: 14px; display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+.pull-results .item { background: #fff; border-radius: 8px; padding: 6px 10px; border: 2px solid var(--gold); }
+.pull-results .item.special { background: var(--gold); }
+
+/* ----- home / inventory screen ----- */
+.room {
+  position: relative; background: var(--grass); border-radius: 12px;
+  min-height: 420px; padding: 16px;
+}
+.room-items { display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 12px; }
+.furn {
+  border: 5px solid var(--wood); border-radius: 6px; background: transparent;
+  font-size: 2.4rem; min-width: 110px; min-height: 130px; display: flex;
+  flex-direction: column; align-items: center; justify-content: center;
+}
+.furn small { font-size: .75rem; color: #fff; }
+.chest { min-height: 90px; background: rgba(255,255,255,.12); }
+.room-hint { color: var(--accent); font-size: 1.5rem; font-weight: bold; margin: 18px 0 4px; }
+.room-hint.sub { font-size: 1.1rem; margin-left: 24px; }
+.inventory-panel {
+  background: #fff; border-radius: 10px; padding: 12px; margin-top: 12px;
+}
+.inventory-panel ul { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+.inventory-panel li { background: var(--pale); border-radius: 8px; padding: 6px 10px; }
+
+/* ----- map screen ----- */
+.map { position: relative; background: var(--grass); border-radius: 12px; height: 420px; }
+.map svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.map-node {
+  position: absolute; transform: translate(-50%, -50%); text-align: center;
+  background: none; border: none; font-weight: bold;
+}
+.map-node .dot {
+  display: block; width: 34px; height: 34px; margin: 4px auto 0; border-radius: 50%;
+  background: var(--gold); border: 3px solid #e09a00;
+}
+.map-node.current .dot { box-shadow: 0 0 0 5px #fff; }
+.map-node.locked { opacity: .55; }
+
+/* ----- toast ----- */
+.toast {
+  position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+  background: #222; color: #fff; padding: 10px 18px; border-radius: 10px;
+}
+
+@media (max-width: 640px) {
+  .scene { height: 280px; }
+  .fighter { font-size: 2.6rem; }
+}

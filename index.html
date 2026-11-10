@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Chicken Quest</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <!-- Top bar: title, egg currency, and navigation between screens -->
+  <header class="topbar">
+    <h1>🐔 Chicken Quest</h1>
+    <nav id="nav">
+      <button data-screen="battle">Quest</button>
+      <button data-screen="gacha">Pull</button>
+      <button data-screen="home">Home</button>
+      <button data-screen="map">Map</button>
+    </nav>
+    <div class="eggs">🥚 <span id="egg-count">0</span></div>
+  </header>
+
+  <!-- Each screen's view module renders into this container -->
+  <main id="screen" aria-live="polite"></main>
+
+  <!-- Toast area for stub feedback / messages -->
+  <div id="toast" class="toast hidden"></div>
+
+  <!-- Load order matters: namespace/state -> stubs -> views -> router -->
+  <script src="js/state.js"></script>
+  <script src="js/stubs.js"></script>
+  <script src="js/views/battle.js"></script>
+  <script src="js/views/gacha.js"></script>
+  <script src="js/views/home.js"></script>
+  <script src="js/views/map.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
