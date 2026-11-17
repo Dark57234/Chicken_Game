@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Lofi Town - Egg World</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+  <div id="fade-overlay"></div>
+
+  <!-- Top Bar -->
+  <div class="top-bar">
+    <div class="brand-title" id="location-title">CHICKEN TOWN</div>
+    <div class="header-actions">
+      <div class="pill" id="egg-count">🥚 1,250 Eggs</div>
+      <button class="btn-pull" id="open-quests-btn" style="background: #2a9d8f;">📜 Quests</button>
+      <button class="btn-pull" id="open-pull-btn">✨ PULL</button>
+    </div>
+  </div>
+
+  <div class="instructions">Walk to the <strong>Top-Left House</strong> door to enter your cabin, or head <strong>Right into the Forest</strong>!</div>
+
+  <canvas id="space-canvas"></canvas>
+
+  <!-- Gacha Modal -->
+  <div class="modal-overlay" id="gacha-modal">
+    <div class="gacha-card" id="gacha-main-view">
+      <h2>Summon Banner</h2>
+      <div class="banner-preview">
+        <div class="coming-soon-badge">CHICKENS COMING SOON</div>
+        <h3 style="color: #2b2d42; margin-top: 4px;">Furniture & Weapons Wish</h3>
+        <p style="font-size: 0.85rem; color: #6c757d; margin-top: 6px;">
+          Pull cozy furniture to auto-decorate your cabin or weapons for your chicken!
+        </p>
+      </div>
+
+      <div class="gacha-buttons">
+        <button class="pull-btn-action" id="pull-1-btn">1 Pull<br><small style="font-weight: 400;">(10 Eggs)</small></button>
+        <button class="pull-btn-action" id="pull-10-btn" style="background: #e76f51;">10 Pulls<br><small style="font-weight: 400;">(100 Eggs)</small></button>
+      </div>
+      
+      <button id="close-gacha-btn" style="margin-top: 15px; background: none; border: none; color: #6c757d; cursor: pointer; font-size: 0.85rem;">Close</button>
+    </div>
+
+    <div class="gacha-card" id="gacha-result-view" style="display: none;">
+      <h2>Summon Results!</h2>
+      <div class="results-grid" id="results-container"></div>
+      <button class="pull-btn-action" id="claim-results-btn" style="width: 100%;">Collect Rewards</button>
+    </div>
+  </div>
+
+  <!-- Quests Modal -->
+  <div class="modal-overlay" id="quests-modal">
+    <div class="gacha-card">
+      <h2>Chicken Quests</h2>
+      <p style="font-size: 0.85rem; color: #6c757d; margin-top: 5px; margin-bottom: 15px;">Complete tasks to unlock new regions and rewards!</p>
+      
+      <div id="quest-list-container" style="max-height: 250px; overflow-y: auto; margin-bottom: 20px;"></div>
+
+      <button class="pull-btn-action" id="close-quests-btn" style="width: 100%; background: #6c757d;">Close</button>
+    </div>
+  </div>
+
+  <script src="js/main.js"></script>
+</body>
+</html>
