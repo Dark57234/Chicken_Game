@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Lofi Town - Egg World</title>
+  <style>
+    :root {
+      --bg-color: #5b8c3d;
+      --panel-bg: rgba(255, 255, 255, 0.92);
+      --accent: #e76f51;
+      --accent-hover: #d65a3c;
+      --text-main: #2b2d42;
+      --text-muted: #6c757d;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    }
+
+    body, html {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+    }
+
+    #space-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      /* Prevents browser blur on pixel art */
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+    }
+
+    .top-bar {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      right: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 10;
+      pointer-events: none;
+    }
+
+    .brand-title {
+      font-weight: 700;
+      font-size: 1.1rem;
+      letter-spacing: 0.5px;
+      color: var(--text-main);
+      background: var(--panel-bg);
+      padding: 8px 16px;
+      border-radius: 20px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      pointer-events: auto;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 10px;
+      pointer-events: auto;
+    }
+
+    .pill {
+      background: var(--panel-bg);
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-pull {
+      background: var(--accent);
+      color: white;
+      border: none;
+      padding: 8px 20px;
+      border-radius: 20px;
+      font-weight: 700;
+      font-size: 0.9rem;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(231, 111, 81, 0.3);
+      transition: transform 0.1s, background 0.2s;
+    }
+
+    .btn-pull:hover {
+      background: var(--accent-hover);
+      transform: translateY(-1px);
+    }
+
+    .instructions {
+      position: absolute;
+      top: 80px;
+      left: 20px;
+      background: var(--panel-bg);
+      padding: 10px 14px;
+      border-radius: 10px;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      z-index: 10;
+    }
+
+    #fade-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: black;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.4s ease-in-out;
+      z-index: 50;
+    }
+
+    /* Modal Styling */
+    .modal-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(4px);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 100;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+    }
+
+    .modal-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .gacha-card {
+      background: white;
+      border-radius: 24px;
+      padding: 30px;
+      width: 90%;
+      max-width: 550px;
+      text-align: center;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+    }
+
+    .banner-preview {
+      background: #f4f1ea;
+      border-radius: 16px;
+      padding: 24px;
+      margin: 20px 0;
+      border: 2px dashed #e0dbd1;
+    }
+
+    .coming-soon-badge {
+      display: inline-block;
+      background: #e76f51;
+      color: white;
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 12px;
+      margin-bottom: 8px;
+    }
+
+    .gacha-buttons {
+      display: flex;
+      gap: 15px;
+      justify-content: center;
+      margin-top: 20px;
+    }
+
+    .pull-btn-action {
+      flex: 1;
+      background: #2a9d8f;
+      color: white;
+      border: none;
+      padding: 12px 16px;
+      border-radius: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      font-size: 0.95rem;
+    }
+
+    .pull-btn-action:hover {
+      background: #238479;
+    }
+
+    .results-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      max-height: 220px;
+      overflow-y: auto;
+      margin: 15px 0;
+    }
+
+    .reward-item {
+      background: #f8f9fa;
+      border: 2px solid #e9ecef;
+      border-radius: 12px;
+      padding: 10px;
+      width: 90px;
+      text-align: center;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    .reward-item.rare {
+      border-color: #ffd166;
+      background: #fffdf0;
+    }
+
+    .quest-card {
+      background: #f8f9fa;
+      border: 2px solid #e9ecef;
+      border-radius: 12px;
+      padding: 14px;
+      margin-bottom: 10px;
+      text-align: left;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .quest-card.completed {
+      border-color: #2a9d8f;
+      background: #f0f7f6;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="fade-overlay"></div>
+
+  <!-- Top Bar -->
+  <div class="top-bar">
+    <div class="brand-title" id="location-title">CHICKEN TOWN</div>
+    <div class="header-actions">
+      <div class="pill" id="egg-count">🥚 1,250 Eggs</div>
+      <button class="btn-pull" id="open-quests-btn" style="background: #2a9d8f;">📜 Quests</button>
+      <button class="btn-pull" id="open-pull-btn">✨ PULL</button>
+    </div>
+  </div>
+
+  <div class="instructions">Walk to the <strong>Top-Left House</strong> door to enter your cabin, or head <strong>Right into the Forest</strong>!</div>
+
+  <canvas id="space-canvas"></canvas>
+
+  <!-- Gacha Modal -->
+  <div class="modal-overlay" id="gacha-modal">
+    <div class="gacha-card" id="gacha-main-view">
+      <h2>Summon Banner</h2>
+      <div class="banner-preview">
+        <div class="coming-soon-badge">CHICKENS COMING SOON</div>
+        <h3 style="color: #2b2d42; margin-top: 4px;">Furniture & Weapons Wish</h3>
+        <p style="font-size: 0.85rem; color: #6c757d; margin-top: 6px;">
+          Pull cozy furniture to auto-decorate your cabin or weapons for your chicken!
+        </p>
+      </div>
+
+      <div class="gacha-buttons">
+        <button class="pull-btn-action" id="pull-1-btn">1 Pull<br><small style="font-weight: 400;">(10 Eggs)</small></button>
+        <button class="pull-btn-action" id="pull-10-btn" style="background: #e76f51;">10 Pulls<br><small style="font-weight: 400;">(100 Eggs)</small></button>
+      </div>
+      
+      <button id="close-gacha-btn" style="margin-top: 15px; background: none; border: none; color: #6c757d; cursor: pointer; font-size: 0.85rem;">Close</button>
+    </div>
+
+    <div class="gacha-card" id="gacha-result-view" style="display: none;">
+      <h2>Summon Results!</h2>
+      <div class="results-grid" id="results-container"></div>
+      <button class="pull-btn-action" id="claim-results-btn" style="width: 100%;">Collect Rewards</button>
+    </div>
+  </div>
+
+  <!-- Quests Modal -->
+  <div class="modal-overlay" id="quests-modal">
+    <div class="gacha-card">
+      <h2>Chicken Quests</h2>
+      <p style="font-size: 0.85rem; color: #6c757d; margin-top: 5px; margin-bottom: 15px;">Complete tasks to unlock new regions and rewards!</p>
+      
+      <div id="quest-list-container" style="max-height: 250px; overflow-y: auto; margin-bottom: 20px;"></div>
+
+      <button class="pull-btn-action" id="close-quests-btn" style="width: 100%; background: #6c757d;">Close</button>
+    </div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('space-canvas');
+    const ctx = canvas.getContext('2d');
+    const fadeOverlay = document.getElementById('fade-overlay');
+    const locationTitle = document.getElementById('location-title');
+    const eggCountDisplay = document.getElementById('egg-count');
+
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    // Optimized Map Dimensions (480 x 320 for zero lag & crisp pixel scaling)
+    let mapLoaded = false;
+    const mapImg = new Image();
+    mapImg.onload = () => { mapLoaded = true; };
+    mapImg.src = 'Map.png';
+
+    const mapWidth = 480;
+    const mapHeight = 320;
+    const zoomLevel = 3.0; // Clean upscale factor for 480x320 maps
+
+    // Chicken Sprite Asset
+    let chickenLoaded = false;
+    const chickenImg = new Image();
+    chickenImg.onload = () => { chickenLoaded = true; };
+    chickenImg.src = 'OriChicken.png';
+
+    let eggs = 1250;
+    const unlockedFurniture = new Set();
+    const equippedWeapon = { name: null, icon: null };
+
+    const quests = [
+      { 
+        id: 'forest_unlock', 
+        title: '🌲 Whispering Woods Expedition', 
+        description: 'Explore the dark forest border on the right edge of town.', 
+        completed: false 
+      }
+    ];
+
+    const gachaPool = [
+      { id: 'fireplace', name: 'Cozy Fireplace', type: 'furniture', icon: '🔥', rare: true },
+      { id: 'bookshelf', name: 'Oak Bookshelf', type: 'furniture', icon: '📚', rare: false },
+      { id: 'plant', name: 'Potted Plant', type: 'furniture', icon: '🪴', rare: false },
+      { id: 'armchair', name: 'Velvet Armchair', type: 'furniture', icon: '🪑', rare: false },
+      { id: 'sword', name: 'Wooden Sword', type: 'weapon', icon: '🗡️', rare: false },
+      { id: 'wand', name: 'Magic Wand', type: 'weapon', icon: '🪄', rare: true },
+      { id: 'shield', name: 'Egg Shield', type: 'weapon', icon: '🛡️', rare: false }
+    ];
+
+    const furnitureLocations = {
+      fireplace: { x: 380, y: 160, width: 40, height: 30, color: '#e76f51', label: '🔥' },
+      bookshelf: { x: 215, y: 160, width: 50, height: 30, color: '#5c3a21', label: '📚' },
+      plant:     { x: 560, y: 170, width: 30, height: 30, color: '#2a9d8f', label: '🪴' },
+      armchair:  { x: 260, y: 350, width: 45, height: 45, color: '#e9c46a', label: '🪑' }
+    };
+
+    const playerSize = 24;
+    let currentScene = 'town';
+    let isTransitioning = false;
+
+    // Player position scaled to 480x320 map coordinates
+    const townPlayer = { x: 70, y: 70, speed: 3 };
+    const housePlayer = { x: 400, y: 440, speed: 4 };
+    const forestPlayer = { x: 400, y: 440, speed: 4 };
+
+    let facingDirection = 1;
+    const keys = {};
+
+    // Scaled Triggers for 480x320
+    const chickenHouseDoor = { x: 60, y: 45, width: 25, height: 20 }; 
+    const forestEntranceZone = { x: 410, y: 0, width: 70, height: 320 };
+
+    // Scaled Collision Obstacles for 480x320
+    const obstacles = [
+      { x: 10, y: 10, w: 80, h: 50 },
+      { x: 170, y: 10, w: 70, h: 50 },
+      { x: 260, y: 10, w: 80, h: 40 },
+      { x: 10, y: 140, w: 60, h: 50 },
+      { x: 5, y: 260, w: 90, h: 60 },
+      { x: 230, y: 260, w: 90, h: 60 },
+      // Map Outer Borders (Prevents walking off screen)
+      { x: -20, y: -20, w: 20, h: mapHeight + 40 }, 
+      { x: -20, y: -20, w: mapWidth + 40, h: 20 },  
+      { x: -20, y: mapHeight - 5, w: mapWidth + 40, h: 20 } 
+    ];
+
+    const cabinBounds = { x: 200, y: 150, width: 400, height: 350 };
+    const cabinExitMat = { x: 370, y: 470, width: 60, height: 20 };
+
+    const forestBounds = { x: 200, y: 150, width: 400, height: 350 };
+    const forestExitMat = { x: 370, y: 470, width: 60, height: 20 };
+
+    window.addEventListener('keydown', e => keys[e.key.toLowerCase()] = true);
+    window.addEventListener('keyup', e => keys[e.key.toLowerCase()] = false);
+
+    function updateEggDisplay() {
+      eggCountDisplay.innerText = `🥚 ${eggs.toLocaleString()} Eggs`;
+    }
+
+    // Gacha Modal
+    const gachaModal = document.getElementById('gacha-modal');
+    const openPullBtn = document.getElementById('open-pull-btn');
+    const closeGachaBtn = document.getElementById('close-gacha-btn');
+    const pull1Btn = document.getElementById('pull-1-btn');
+    const pull10Btn = document.getElementById('pull-10-btn');
+    const gachaMainView = document.getElementById('gacha-main-view');
+    const gachaResultView = document.getElementById('gacha-result-view');
+    const resultsContainer = document.getElementById('results-container');
+    const claimResultsBtn = document.getElementById('claim-results-btn');
+
+    openPullBtn.addEventListener('click', () => gachaModal.classList.add('active'));
+    closeGachaBtn.addEventListener('click', () => gachaModal.classList.remove('active'));
+
+    function performPulls(count) {
+      const cost = count * 10;
+      if (eggs < cost) {
+        alert('Not enough Eggs!');
+        return;
+      }
+
+      eggs -= cost;
+      updateEggDisplay();
+
+      const pulledItems = [];
+      for (let i = 0; i < count; i++) {
+        const item = gachaPool[Math.floor(Math.random() * gachaPool.length)];
+        pulledItems.push(item);
+
+        if (item.type === 'furniture') {
+          unlockedFurniture.add(item.id);
+        } else if (item.type === 'weapon') {
+          equippedWeapon.name = item.name;
+          equippedWeapon.icon = item.icon;
+        }
+      }
+
+      resultsContainer.innerHTML = '';
+      pulledItems.forEach(item => {
+        const div = document.createElement('div');
+        div.className = `reward-item ${item.rare ? 'rare' : ''}`;
+        div.innerHTML = `<div style="font-size: 1.5rem;">${item.icon}</div><div>${item.name}</div>`;
+        resultsContainer.appendChild(div);
+      });
+
+      gachaMainView.style.display = 'none';
+      gachaResultView.style.display = 'block';
+    }
+
+    pull1Btn.addEventListener('click', () => performPulls(1));
+    pull10Btn.addEventListener('click', () => performPulls(10));
+
+    claimResultsBtn.addEventListener('click', () => {
+      gachaResultView.style.display = 'none';
+      gachaMainView.style.display = 'block';
+      gachaModal.classList.remove('active');
+    });
+
+    // Quests Modal
+    const questsModal = document.getElementById('quests-modal');
+    const openQuestsBtn = document.getElementById('open-quests-btn');
+    const closeQuestsBtn = document.getElementById('close-quests-btn');
+    const questListContainer = document.getElementById('quest-list-container');
+
+    openQuestsBtn.addEventListener('click', () => {
+      renderQuestList();
+      questsModal.classList.add('active');
+    });
+    closeQuestsBtn.addEventListener('click', () => questsModal.classList.remove('active'));
+
+    function renderQuestList() {
+      questListContainer.innerHTML = '';
+      quests.forEach(q => {
+        const div = document.createElement('div');
+        div.className = `quest-card ${q.completed ? 'completed' : ''}`;
+        div.innerHTML = `
+          <div>
+            <strong>${q.title}</strong>
+            <p style="font-size: 0.8rem; color: #6c757d; margin-top: 2px;">${q.description}</p>
+            <span style="font-size: 0.75rem; font-weight: 700; color: ${q.completed ? '#2a9d8f' : '#e76f51'};">
+              ${q.completed ? '✓ Completed' : '🔒 Locked (Action Required)'}
+            </span>
+          </div>
+          ${!q.completed ? `<button class="btn-pull" style="padding: 6px 12px; font-size: 0.8rem;" onclick="completeQuest('${q.id}')">Unlock</button>` : ''}
+        `;
+        questListContainer.appendChild(div);
+      });
+    }
+
+    window.completeQuest = function(id) {
+      const quest = quests.find(q => q.id === id);
+      if (quest) {
+        quest.completed = true;
+        renderQuestList();
+        alert('Quest completed! The Whispering Woods are now unlocked.');
+      }
+    };
+
+    function transitionTo(targetScene) {
+      if (isTransitioning) return;
+      isTransitioning = true;
+      fadeOverlay.style.opacity = '1';
+
+      setTimeout(() => {
+        currentScene = targetScene;
+        if (targetScene === 'town') locationTitle.innerText = 'CHICKEN TOWN';
+        else if (targetScene === 'house') locationTitle.innerText = 'WOODEN CABIN';
+        else if (targetScene === 'forest') locationTitle.innerText = 'WHISPERING WOODS';
+
+        if (targetScene === 'house') {
+          housePlayer.x = 400; housePlayer.y = 440;
+        } else if (targetScene === 'forest') {
+          forestPlayer.x = 400; forestPlayer.y = 440;
+        } else if (targetScene === 'town') {
+          townPlayer.x = 70; townPlayer.y = 70;
+        }
+
+        setTimeout(() => {
+          fadeOverlay.style.opacity = '0';
+          isTransitioning = false;
+        }, 200);
+      }, 400);
+    }
+
+    function checkCollision(newX, newY) {
+      const pr = playerSize / 3; 
+      for (const obs of obstacles) {
+        if (newX + pr > obs.x && newX - pr < obs.x + obs.w &&
+            newY + pr > obs.y && newY - pr < obs.y + obs.h) {
+          return true;
+        }
+      }
+      return false;
+    }
+
+    function update() {
+      if (isTransitioning || gachaModal.classList.contains('active') || questsModal.classList.contains('active')) return;
+
+      if (currentScene === 'town') {
+        const speed = townPlayer.speed;
+        let dx = 0, dy = 0;
+
+        if (keys['arrowup'] || keys['w']) dy -= speed;
+        if (keys['arrowdown'] || keys['s']) dy += speed;
+        if (keys['arrowleft'] || keys['a']) { dx -= speed; facingDirection = -1; }
+        if (keys['arrowright'] || keys['d']) { dx += speed; facingDirection = 1; }
+
+        let nextX = townPlayer.x + dx;
+        let nextY = townPlayer.y + dy;
+
+        if (!checkCollision(nextX, townPlayer.y)) townPlayer.x = nextX;
+        if (!checkCollision(townPlayer.x, nextY)) townPlayer.y = nextY;
+
+        if (townPlayer.x >= chickenHouseDoor.x && townPlayer.x <= chickenHouseDoor.x + chickenHouseDoor.width &&
+            townPlayer.y >= chickenHouseDoor.y && townPlayer.y <= chickenHouseDoor.y + chickenHouseDoor.height) {
+          transitionTo('house');
+        }
+
+        if (townPlayer.x > forestEntranceZone.x) {
+          const forestQuest = quests.find(q => q.id === 'forest_unlock');
+          if (!forestQuest.completed) {
+            alert('🔒 The path into the Whispering Woods is blocked! Complete the quest in your Quests menu to unlock it.');
+            townPlayer.x = forestEntranceZone.x - 10;
+          } else {
+            transitionTo('forest');
+          }
+        }
+
+      } else if (currentScene === 'house') {
+        const speed = housePlayer.speed;
+        let dx = 0, dy = 0;
+
+        if (keys['arrowup'] || keys['w']) dy -= speed;
+        if (keys['arrowdown'] || keys['s']) dy += speed;
+        if (keys['arrowleft'] || keys['a']) { dx -= speed; facingDirection = -1; }
+        if (keys['arrowright'] || keys['d']) { dx += speed; facingDirection = 1; }
+
+        housePlayer.x = Math.max(cabinBounds.x + 20, Math.min(cabinBounds.x + cabinBounds.width - 20, housePlayer.x + dx));
+        housePlayer.y = Math.max(cabinBounds.y + 30, Math.min(cabinBounds.y + cabinBounds.height - 10, housePlayer.y + dy));
+
+        if (Math.abs(housePlayer.x - (cabinExitMat.x + 30)) < 30 &&
+            Math.abs(housePlayer.y - (cabinExitMat.y + 10)) < 20) {
+          transitionTo('town');
+        }
+
+      } else if (currentScene === 'forest') {
+        const speed = forestPlayer.speed;
+        let dx = 0, dy = 0;
+
+        if (keys['arrowup'] || keys['w']) dy -= speed;
+        if (keys['arrowdown'] || keys['s']) dy += speed;
+        if (keys['arrowleft'] || keys['a']) { dx -= speed; facingDirection = -1; }
+        if (keys['arrowright'] || keys['d']) { dx += speed; facingDirection = 1; }
+
+        forestPlayer.x = Math.max(forestBounds.x + 20, Math.min(forestBounds.x + forestBounds.width - 20, forestPlayer.x + dx));
+        forestPlayer.y = Math.max(forestBounds.y + 30, Math.min(forestBounds.y + forestBounds.height - 10, forestPlayer.y + dy));
+
+        if (Math.abs(forestPlayer.x - (forestExitMat.x + 30)) < 30 &&
+            Math.abs(forestPlayer.y - (forestExitMat.y + 10)) < 20) {
+          transitionTo('town');
+        }
+      }
+    }
+
+    function draw() {
+      const centerX = canvas.width / 2;
+      const centerY = canvas.height / 2;
+
+      ctx.imageSmoothingEnabled = false; // Ensures crystal-clear pixel art
+
+      if (currentScene === 'town') {
+        ctx.fillStyle = '#5b8c3d';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // Smooth camera follow centered on chicken with 3x upscale zoom
+        ctx.save();
+        ctx.translate(centerX, centerY);
+        ctx.scale(zoomLevel, zoomLevel);
+        ctx.translate(-townPlayer.x, -townPlayer.y);
+
+        if (mapLoaded) {
+          ctx.drawImage(mapImg, 0, 0, mapWidth, mapHeight);
+        } else {
+          ctx.fillStyle = '#82c151';
+          ctx.fillRect(0, 0, mapWidth, mapHeight);
+          ctx.fillStyle = '#ffffff';
+          ctx.font = '16px Inter, sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText('Loading Map...', mapWidth / 2, mapHeight / 2);
+        }
+
+        drawChicken(townPlayer.x, townPlayer.y);
+        ctx.restore();
+
+      } else if (currentScene === 'house') {
+        ctx.fillStyle = '#1c1917';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        const roomOffsetX = centerX - 400;
+        const roomOffsetY = centerY - 300;
+
+        ctx.save();
+        ctx.translate(roomOffsetX, roomOffsetY);
+
+        ctx.fillStyle = '#a06a3b';
+        ctx.beginPath(); ctx.roundRect(cabinBounds.x, cabinBounds.y, cabinBounds.width, cabinBounds.height, 12); ctx.fill();
+
+        ctx.strokeStyle = '#5c3a21';
+        ctx.lineWidth = 12; ctx.stroke();
+
+        ctx.fillStyle = '#e76f51';
+        ctx.beginPath(); ctx.roundRect(cabinExitMat.x, cabinExitMat.y, cabinExitMat.width, cabinExitMat.height, 4); ctx.fill();
+        ctx.fillStyle = '#ffffff'; ctx.font = '600 10px Inter, sans-serif'; ctx.textAlign = 'center';
+        ctx.fillText('EXIT', cabinExitMat.x + 30, cabinExitMat.y + 13);
+
+        unlockedFurniture.forEach(id => {
+          const item = furnitureLocations[id];
+          if (item) {
+            ctx.fillStyle = item.color;
+            ctx.beginPath(); ctx.roundRect(item.x, item.y, item.width, item.height, 6); ctx.fill();
+            ctx.fillStyle = '#fff'; ctx.font = '16px Inter, sans-serif'; ctx.textAlign = 'center';
+            ctx.fillText(item.label, item.x + item.width / 2, item.y + item.height / 2 + 5);
+          }
+        });
+
+        drawChicken(housePlayer.x, housePlayer.y);
+        ctx.restore();
+
+      } else if (currentScene === 'forest') {
+        ctx.fillStyle = '#0f172a';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        const roomOffsetX = centerX - 400;
+        const roomOffsetY = centerY - 300;
+
+        ctx.save();
+        ctx.translate(roomOffsetX, roomOffsetY);
+
+        ctx.fillStyle = '#1e293b';
+        ctx.beginPath(); ctx.roundRect(forestBounds.x, forestBounds.y, forestBounds.width, forestBounds.height, 12); ctx.fill();
+
+        ctx.strokeStyle = '#090d16';
+        ctx.lineWidth = 12; ctx.stroke();
+
+        ctx.fillStyle = '#e76f51';
+        ctx.beginPath(); ctx.roundRect(forestExitMat.x, forestExitMat.y, forestExitMat.width, forestExitMat.height, 4); ctx.fill();
+        ctx.fillStyle = '#ffffff'; ctx.font = '600 10px Inter, sans-serif'; ctx.textAlign = 'center';
+        ctx.fillText('EXIT', forestExitMat.x + 30, forestExitMat.y + 13);
+
+        ctx.fillStyle = '#065f46';
+        ctx.beginPath(); ctx.arc(260, 210, 30, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(540, 210, 30, 0, Math.PI * 2); ctx.fill();
+
+        ctx.fillStyle = '#34d399'; ctx.font = '700 14px Inter, sans-serif'; ctx.textAlign = 'center';
+        ctx.fillText('✨ Deep Whispering Woods ✨', forestBounds.x + forestBounds.width / 2, forestBounds.y + 60);
+
+        drawChicken(forestPlayer.x, forestPlayer.y);
+        ctx.restore();
+      }
+    }
+
+    function drawChicken(x, y) {
+      ctx.fillStyle = 'rgba(0,0,0,0.18)';
+      ctx.beginPath();
+      ctx.ellipse(x, y + playerSize / 2 - 2, 10, 4, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.save();
+      ctx.translate(x, y);
+
+      if (facingDirection === -1) {
+        ctx.scale(-1, 1);
+      }
+
+      if (chickenLoaded) {
+        ctx.drawImage(chickenImg, -playerSize / 2, -playerSize / 2, playerSize, playerSize);
+      } else {
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath(); ctx.arc(0, 0, playerSize / 2, 0, Math.PI * 2); ctx.fill();
+      }
+
+      if (equippedWeapon.icon) {
+        ctx.font = '12px Inter, sans-serif';
+        ctx.fillText(equippedWeapon.icon, 8, 4);
+      }
+
+      ctx.restore();
+    }
+
+    function loop() {
+      update();
+      draw();
+      requestAnimationFrame(loop);
+    }
+
+    loop();
+  </script>
+</body>
+</html>
